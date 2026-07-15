@@ -301,6 +301,69 @@
   background-color: rgba(239, 68, 68, 0.1);
 }
 
+/* Editor Switch Layout */
+.editor-switch-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.editor-switch-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.editor-switch-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.editor-switch-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.editor-switch-slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--text-secondary);
+  border-radius: 50%;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.editor-switch-checkbox:focus-visible + .editor-switch-slider {
+  box-shadow: 0 0 0 2px var(--border-glow);
+}
+
+.editor-switch-checkbox:checked + .editor-switch-slider {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.editor-switch-checkbox:checked + .editor-switch-slider:before {
+  transform: translateX(20px);
+  background-color: #fff;
+}
+
 /* Adaptive styling on wider layouts (tablets/desktops) */
 @media (min-width: 501px) {
   body {

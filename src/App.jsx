@@ -5,14 +5,16 @@ import ColorPicker, { PRESET_COLORS } from './components/ColorPicker';
 import Checklist from './components/Checklist';
 import './App.css';
 
-// Initial demo slots (no done state)
+// Initial demo slots unified
 const INITIAL_SLOTS = [
   {
     id: 'demo-1',
-    title: 'Rituel matinal & Café ☕',
+    title: 'Rituel matinal & Café',
     color: '#7c3aed',
+    hasTime: true,
     startTime: '07:30',
     endTime: '08:30',
+    emoji: '☕',
     items: [
       { id: 't1', text: 'Boire un grand verre d\'eau' },
       { id: 't2', text: '10 min de méditation' },
@@ -21,10 +23,12 @@ const INITIAL_SLOTS = [
   },
   {
     id: 'demo-2',
-    title: 'Développement App Mobile 🚀',
+    title: 'Développement App Mobile',
     color: '#4f46e5',
+    hasTime: true,
     startTime: '09:00',
     endTime: '11:30',
+    emoji: '🚀',
     items: [
       { id: 't4', text: 'Créer le design system CSS' },
       { id: 't5', text: 'Implémenter le bottom sheet tactile' },
@@ -33,23 +37,25 @@ const INITIAL_SLOTS = [
   },
   {
     id: 'demo-3',
-    title: 'Session running 🏃‍♂️',
+    title: 'Session running',
     color: '#059669',
+    hasTime: true,
     startTime: '12:30',
     endTime: '13:30',
+    emoji: '🏃',
     items: [
       { id: 't8', text: 'S\'échauffer les articulations' },
       { id: 't9', text: 'Parcours de 6 km' }
     ]
-  }
-];
-
-// Initial collections (standalone lists)
-const INITIAL_COLLECTIONS = [
+  },
   {
-    id: 'col-1',
-    emoji: '🛒',
+    id: 'demo-4',
     title: 'Courses',
+    color: '#eab308', 
+    hasTime: false,
+    startTime: '12:00', 
+    endTime: '13:00',
+    emoji: '🛒',
     items: [
       { id: 'c1', text: 'Pâtes complètes' },
       { id: 'c2', text: 'Lait d\'avoine' },
@@ -57,92 +63,117 @@ const INITIAL_COLLECTIONS = [
     ]
   },
   {
-    id: 'col-2',
-    emoji: '💡',
+    id: 'demo-5',
     title: 'Idées',
+    color: '#0ea5e9',
+    hasTime: false,
+    startTime: '14:00',
+    endTime: '15:00',
+    emoji: '💡',
     items: [
       { id: 'i1', text: 'Apprendre le piano' },
       { id: 'i2', text: 'Réserver vacances d\'été' }
-    ]
-  },
-  {
-    id: 'col-3',
-    emoji: '🍿',
-    title: 'Films à voir',
-    items: [
-      { id: 'f1', text: 'Interstellar' },
-      { id: 'f2', text: 'Inception' }
     ]
   }
 ];
 
 export default function App() {
   const [slots, setSlots] = useState(() => {
-    const saved = localStorage.getItem('day_scheduler_slots');
-    return saved ? JSON.parse(saved) : INITIAL_SLOTS;
+    // Read from new key first
+    const savedUnified = localStorage.getItem('day_scheduler_unified_slots');
+    if (savedUnified) return JSON.parse(savedUnified);
+
+    // Migration from previous separate collections
+    const oldSlotsStr = localStorage.getItem('day_scheduler_slots');
+    const oldColsStr = localStorage.getItem('day_scheduler_collections');
+    
+    if (oldSlotsStr || oldColsStr) {
+      let merged = [];
+      if (oldSlotsStr) {
+        const oldSlots = JSON.parse(oldSlotsStr);
+        merged = [...merged, ...oldSlots.map(s => ({...s, hasTime: true, emoji: s.emoji || '📝'}))];
+      }
+      if (oldColsStr) {
+        const oldCols = JSON.parse(oldColsStr);
+        merged = [...merged, ...oldCols.map(c => ({
+          ...c, 
+          hasTime: false, 
+          color: '#6366f1', 
+          startTime: '12:00', 
+          endTime: '13:00'
+        }))];
+      }
+      return merged;
+    }
+    
+    return INITIAL_SLOTS;
   });
 
-  const [collections, setCollections] = useState(() => {
-    const saved = localStorage.getItem('day_scheduler_collections');
-    return saved ? JSON.parse(saved) : INITIAL_COLLECTIONS;
-  });
-
-  // Selection states for viewing details
-  const [selectedItem, setSelectedItem] = useState(null); // slot or collection
-  const [selectedType, setSelectedType] = useState(null); // 'slot' or 'collection'
+  // Selection state for viewing details
+  const [selectedItem, setSelectedItem] = useState(null); 
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // Editor states (Slot or Collection)
+  // Editor states
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editorType, setEditorType] = useState('slot'); // 'slot' or 'collection'
   const [editorMode, setEditorMode] = useState('create'); // 'create' or 'edit'
 
-  // Slot editor fields
-  const [editSlotId, setEditSlotId] = useState(null);
-  const [editSlotTitle, setEditSlotTitle] = useState('');
-  const [editSlotColor, setEditSlotColor] = useState('#4f46e5');
-  const [editSlotStartTime, setEditSlotStartTime] = useState('09:00');
-  const [editSlotEndTime, setEditSlotEndTime] = useState('10:00');
-  const [editSlotItems, setEditSlotItems] = useState([]);
-
-  // Collection editor fields
-  const [editColId, setEditColId] = useState(null);
-  const [editColEmoji, setEditColEmoji] = useState('📝');
-  const [editColTitle, setEditColTitle] = useState('');
-  const [editColItems, setEditColItems] = useState([]);
+  // Unified editor fields
+  const [editId, setEditId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editColor, setEditColor] = useState('#4f46e5');
+  const [editEmoji, setEditEmoji] = useState('📝');
+  const [editHasTime, setEditHasTime] = useState(true);
+  const [editStartTime, setEditStartTime] = useState('09:00');
+  const [editEndTime, setEditEndTime] = useState('10:00');
+  const [editItems, setEditItems] = useState([]);
 
   // Persist to localStorage
   useEffect(() => {
-    localStorage.setItem('day_scheduler_slots', JSON.stringify(slots));
+    localStorage.setItem('day_scheduler_unified_slots', JSON.stringify(slots));
   }, [slots]);
 
-  useEffect(() => {
-    localStorage.setItem('day_scheduler_collections', JSON.stringify(collections));
-  }, [collections]);
+  // Derived filtered lists
+  const timelineSlots = slots.filter(s => s.hasTime);
+  const footerSlots = slots.filter(s => !s.hasTime);
 
-  // --- SLOT ACTIONS ---
+  // --- ACTIONS ---
 
   const handleAddSlotAtTime = (start, end) => {
-    setEditorType('slot');
     setEditorMode('create');
-    setEditSlotId(null);
-    setEditSlotTitle('');
-    setEditSlotColor('#4f46e5');
-    setEditSlotStartTime(start);
-    setEditSlotEndTime(end);
-    setEditSlotItems([]);
+    setEditId(null);
+    setEditTitle('');
+    setEditColor('#4f46e5');
+    setEditEmoji('📝');
+    setEditHasTime(true);
+    setEditStartTime(start);
+    setEditEndTime(end);
+    setEditItems([]);
     setIsEditOpen(true);
   };
 
-  const handleOpenEditSlot = (slot) => {
-    setEditorType('slot');
+  const handleAddFooterSlot = () => {
+    setEditorMode('create');
+    setEditId(null);
+    setEditTitle('');
+    setEditColor('#6366f1');
+    setEditEmoji('📝');
+    setEditHasTime(false);
+    setEditStartTime('12:00'); 
+    setEditEndTime('13:00');
+    setEditItems([]);
+    setIsEditOpen(true);
+  };
+
+  const handleOpenEdit = (slot) => {
     setEditorMode('edit');
-    setEditSlotId(slot.id);
-    setEditSlotTitle(slot.title);
-    setEditSlotColor(slot.color);
-    setEditSlotStartTime(slot.startTime);
-    setEditSlotEndTime(slot.endTime);
-    setEditSlotItems([...slot.items]);
+    setEditId(slot.id);
+    setEditTitle(slot.title);
+    setEditColor(slot.color || '#4f46e5');
+    setEditEmoji(slot.emoji || '📝');
+    setEditHasTime(slot.hasTime ?? true);
+    setEditStartTime(slot.startTime || '12:00');
+    setEditEndTime(slot.endTime || '13:00');
+    setEditItems([...(slot.items || [])]);
     setIsDetailOpen(false);
     setIsEditOpen(true);
   };
@@ -155,142 +186,70 @@ export default function App() {
   };
 
   const handleStartTimeChange = (newStart) => {
-    setEditSlotStartTime(newStart);
+    setEditStartTime(newStart);
     const startDec = timeToDecimal(newStart);
-    const endDec = timeToDecimal(editSlotEndTime);
+    const endDec = timeToDecimal(editEndTime);
     if (startDec >= endDec) {
-      setEditSlotEndTime(decimalToTime(Math.min(24, startDec + 1)));
+      setEditEndTime(decimalToTime(Math.min(24, startDec + 1)));
     }
   };
-
-  // --- COLLECTION ACTIONS ---
-
-  const handleOpenCreateCollection = () => {
-    setEditorType('collection');
-    setEditorMode('create');
-    setEditColId(null);
-    setEditColEmoji('📝');
-    setEditColTitle('');
-    setEditColItems([]);
-    setIsEditOpen(true);
-  };
-
-  const handleOpenEditCollection = (col) => {
-    setEditorType('collection');
-    setEditorMode('edit');
-    setEditColId(col.id);
-    setEditColEmoji(col.emoji);
-    setEditColTitle(col.title);
-    setEditColItems([...col.items]);
-    setIsDetailOpen(false);
-    setIsEditOpen(true);
-  };
-
-  const handleDeleteCollection = (id) => {
-    setCollections(prev => prev.filter(c => c.id !== id));
-    setIsDetailOpen(false);
-    setIsEditOpen(false);
-    if (navigator.vibrate) navigator.vibrate(50);
-  };
-
-  // --- GLOBAL SUB-ITEM ACTIONS (Within Detail Sheets) ---
 
   const handleAddDetailItem = (text) => {
     if (!selectedItem) return;
-
     const newItem = { id: `item-${Date.now()}`, text };
-    
-    if (selectedType === 'slot') {
-      const updatedSlot = { ...selectedItem, items: [...selectedItem.items, newItem] };
-      setSelectedItem(updatedSlot);
-      setSlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
-    } else {
-      const updatedCol = { ...selectedItem, items: [...selectedItem.items, newItem] };
-      setSelectedItem(updatedCol);
-      setCollections(prev => prev.map(c => c.id === selectedItem.id ? updatedCol : c));
-    }
+    const updatedSlot = { ...selectedItem, items: [...(selectedItem.items || []), newItem] };
+    setSelectedItem(updatedSlot);
+    setSlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
     if (navigator.vibrate) navigator.vibrate(15);
   };
 
   const handleDeleteDetailItem = (itemId) => {
     if (!selectedItem) return;
-
-    if (selectedType === 'slot') {
-      const updatedSlot = { ...selectedItem, items: selectedItem.items.filter(item => item.id !== itemId) };
-      setSelectedItem(updatedSlot);
-      setSlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
-    } else {
-      const updatedCol = { ...selectedItem, items: selectedItem.items.filter(item => item.id !== itemId) };
-      setSelectedItem(updatedCol);
-      setCollections(prev => prev.map(c => c.id === selectedItem.id ? updatedCol : c));
-    }
+    const updatedSlot = { ...selectedItem, items: selectedItem.items.filter(item => item.id !== itemId) };
+    setSelectedItem(updatedSlot);
+    setSlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
     if (navigator.vibrate) navigator.vibrate(10);
   };
 
-  // --- SAVE BUTTON HANDLERS ---
-
   const handleSaveEditor = (e) => {
     e.preventDefault();
+    if (!editTitle.trim()) return;
 
-    if (editorType === 'slot') {
-      if (!editSlotTitle.trim()) return;
-      let startDec = timeToDecimal(editSlotStartTime);
-      let endDec = timeToDecimal(editSlotEndTime);
-      let finalEndTime = editSlotEndTime;
+    let startDec = timeToDecimal(editStartTime);
+    let endDec = timeToDecimal(editEndTime);
+    let finalEndTime = editEndTime;
 
-      if (endDec <= startDec) {
-        finalEndTime = decimalToTime(Math.min(24, startDec + 1));
-      }
+    if (endDec <= startDec) {
+      finalEndTime = decimalToTime(Math.min(24, startDec + 1));
+    }
 
-      if (editorMode === 'create') {
-        const newSlot = {
-          id: `slot-${Date.now()}`,
-          title: editSlotTitle.trim(),
-          color: editSlotColor,
-          startTime: editSlotStartTime,
-          endTime: finalEndTime,
-          items: []
-        };
-        setSlots(prev => [...prev, newSlot]);
-      } else {
-        const updatedSlot = {
-          id: editSlotId,
-          title: editSlotTitle.trim(),
-          color: editSlotColor,
-          startTime: editSlotStartTime,
-          endTime: finalEndTime,
-          items: editSlotItems
-        };
-        setSlots(prev => prev.map(s => s.id === editSlotId ? updatedSlot : s));
-        if (selectedItem && selectedItem.id === editSlotId) {
-          setSelectedItem(updatedSlot);
-        }
-      }
+    const emojiVal = editEmoji.trim() || '📝';
+    const singleCharEmoji = [...emojiVal][0] || '📝';
+
+    const slotData = {
+      title: editTitle.trim(),
+      color: editColor,
+      emoji: singleCharEmoji,
+      hasTime: editHasTime,
+      startTime: editStartTime,
+      endTime: finalEndTime,
+      items: editItems
+    };
+
+    if (editorMode === 'create') {
+      const newSlot = {
+        id: `slot-${Date.now()}`,
+        ...slotData
+      };
+      setSlots(prev => [...prev, newSlot]);
     } else {
-      if (!editColTitle.trim()) return;
-      
-      const emojiVal = editColEmoji.trim() || '📝';
-      const singleCharEmoji = [...emojiVal][0] || '📝'; // Extract first character/emoji safely
-
-      if (editorMode === 'create') {
-        const newCol = {
-          id: `col-${Date.now()}`,
-          emoji: singleCharEmoji,
-          title: editColTitle.trim(),
-          items: []
-        };
-        setCollections(prev => [...prev, newCol]);
-      } else {
-        const updatedCol = {
-          id: editColId,
-          emoji: singleCharEmoji,
-          title: editColTitle.trim(),
-          items: editColItems
-        };
-        setCollections(prev => prev.map(c => c.id === editColId ? updatedCol : c));
-        if (selectedItem && selectedItem.id === editColId) {
-          setSelectedItem(updatedCol);
-        }
+      const updatedSlot = {
+        id: editId,
+        ...slotData
+      };
+      setSlots(prev => prev.map(s => s.id === editId ? updatedSlot : s));
+      if (selectedItem && selectedItem.id === editId) {
+        setSelectedItem(updatedSlot);
       }
     }
 
@@ -300,45 +259,41 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Timeline occupies full top area now (header removed) */}
       <main className="app-main">
         <Timeline 
-          slots={slots} 
+          slots={timelineSlots} 
           onSelectSlot={(slot) => {
             setSelectedItem(slot);
-            setSelectedType('slot');
             setIsDetailOpen(true);
           }}
           onAddSlotAtTime={handleAddSlotAtTime}
         />
       </main>
 
-      {/* Footer containing collections horizontal carousel */}
       <footer className="app-footer">
         <div className="footer-carousel">
-          {collections.map(col => (
+          {footerSlots.map(slot => (
             <button
-              key={col.id}
+              key={slot.id}
               type="button"
               className="carousel-item-btn btn-tap"
+              style={{ '--btn-theme-color': slot.color }}
               onClick={() => {
-                setSelectedItem(col);
-                setSelectedType('collection');
+                setSelectedItem(slot);
                 setIsDetailOpen(true);
               }}
-              title={col.title}
+              title={slot.title}
             >
-              <span className="carousel-item-emoji">{col.emoji}</span>
-              <span className="carousel-item-title">{col.title}</span>
+              <span className="carousel-item-emoji">{slot.emoji}</span>
+              <span className="carousel-item-title">{slot.title}</span>
             </button>
           ))}
           
-          {/* Add Collection Button */}
           <button
             type="button"
             className="carousel-add-btn btn-tap"
-            onClick={handleOpenCreateCollection}
-            title="Créer une collection"
+            onClick={handleAddFooterSlot}
+            title="Créer un bouton libre"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -352,14 +307,14 @@ export default function App() {
       <BottomSheet
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title={selectedItem ? `${selectedType === 'collection' ? selectedItem.emoji + ' ' : ''}${selectedItem.title}` : ''}
+        title={selectedItem ? `${selectedItem.emoji} ${selectedItem.title}` : ''}
       >
         {selectedItem && (
           <div 
             className="slot-detail-container" 
-            style={{ '--theme-color': selectedType === 'slot' ? selectedItem.color : 'var(--accent)' }}
+            style={{ '--theme-color': selectedItem.color }}
           >
-            {selectedType === 'slot' && (
+            {selectedItem.hasTime && (
               <div className="slot-detail-meta">
                 <span className="slot-detail-time-badge" style={{ backgroundColor: `${selectedItem.color}25`, color: selectedItem.color }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
@@ -373,10 +328,10 @@ export default function App() {
 
             <div className="slot-detail-checklist">
               <Checklist
-                items={selectedItem.items}
+                items={selectedItem.items || []}
                 onAddItem={handleAddDetailItem}
                 onDeleteItem={handleDeleteDetailItem}
-                themeColor={selectedType === 'slot' ? selectedItem.color : 'var(--accent)'}
+                themeColor={selectedItem.color}
               />
             </div>
 
@@ -384,13 +339,7 @@ export default function App() {
               <button 
                 type="button" 
                 className="action-btn action-edit btn-tap"
-                onClick={() => {
-                  if (selectedType === 'slot') {
-                    handleOpenEditSlot(selectedItem);
-                  } else {
-                    handleOpenEditCollection(selectedItem);
-                  }
-                }}
+                onClick={() => handleOpenEdit(selectedItem)}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px' }}>
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -402,13 +351,7 @@ export default function App() {
               <button 
                 type="button" 
                 className="action-btn action-delete btn-tap"
-                onClick={() => {
-                  if (selectedType === 'slot') {
-                    handleDeleteSlot(selectedItem.id);
-                  } else {
-                    handleDeleteCollection(selectedItem.id);
-                  }
-                }}
+                onClick={() => handleDeleteSlot(selectedItem.id)}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px' }}>
                   <polyline points="3 6 5 6 21 6"></polyline>
@@ -425,99 +368,90 @@ export default function App() {
       <BottomSheet
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        title={
-          editorType === 'slot'
-            ? (editorMode === 'create' ? 'Nouveau créneau' : 'Modifier le créneau')
-            : (editorMode === 'create' ? 'Nouvelle collection' : 'Modifier la collection')
-        }
+        title={editorMode === 'create' ? 'Nouvel élément' : 'Modifier l\'élément'}
       >
         <form onSubmit={handleSaveEditor} className="slot-editor-form">
-          {editorType === 'slot' ? (
-            /* --- SLOT FORM --- */
-            <>
+          
+          <div className="editor-group-row">
+            <div className="editor-group" style={{ flex: '0 0 80px' }}>
+              <label className="editor-label">Émoji</label>
+              <input
+                type="text"
+                placeholder="📝"
+                value={editEmoji}
+                onChange={(e) => setEditEmoji(e.target.value)}
+                maxLength={2}
+                className="editor-input-title"
+                style={{ textAlign: 'center', fontSize: '24px', padding: '10px' }}
+                required
+              />
+            </div>
+            <div className="editor-group">
+              <label className="editor-label">Titre</label>
+              <input
+                type="text"
+                placeholder="Ex: Réunion, Courses..."
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="editor-input-title"
+                required
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <div className="editor-group border-top">
+            <label className="editor-switch-label">
+              <div className="editor-switch-text">
+                <span className="editor-label" style={{ margin: 0 }}>Assigner un horaire</span>
+                <span className="editor-desc">Afficher dans le calendrier</span>
+              </div>
+              <input 
+                type="checkbox" 
+                checked={editHasTime} 
+                onChange={(e) => setEditHasTime(e.target.checked)} 
+                className="editor-switch-checkbox"
+              />
+              <span className="editor-switch-slider"></span>
+            </label>
+          </div>
+
+          {editHasTime && (
+            <div className="editor-group-row">
               <div className="editor-group">
-                <label className="editor-label">Titre</label>
+                <label className="editor-label">Début</label>
                 <input
-                  type="text"
-                  placeholder="Ex: Réunion de projet, Sport..."
-                  value={editSlotTitle}
-                  onChange={(e) => setEditSlotTitle(e.target.value)}
-                  className="editor-input-title"
-                  required
-                  autoFocus
+                  type="time"
+                  value={editStartTime}
+                  onChange={(e) => handleStartTimeChange(e.target.value)}
+                  className="editor-input-time"
                 />
               </div>
-
-              <div className="editor-group-row">
-                <div className="editor-group">
-                  <label className="editor-label">Début</label>
-                  <input
-                    type="time"
-                    value={editSlotStartTime}
-                    onChange={(e) => handleStartTimeChange(e.target.value)}
-                    className="editor-input-time"
-                  />
-                </div>
-                <div className="editor-group">
-                  <label className="editor-label">Fin</label>
-                  <input
-                    type="time"
-                    value={editSlotEndTime}
-                    onChange={(e) => setEditSlotEndTime(e.target.value)}
-                    className="editor-input-time"
-                  />
-                </div>
-              </div>
-
               <div className="editor-group">
-                <ColorPicker
-                  selectedColor={editSlotColor}
-                  onSelectColor={setEditSlotColor}
+                <label className="editor-label">Fin</label>
+                <input
+                  type="time"
+                  value={editEndTime}
+                  onChange={(e) => setEditEndTime(e.target.value)}
+                  className="editor-input-time"
                 />
               </div>
-            </>
-          ) : (
-            /* --- COLLECTION FORM --- */
-            <>
-              <div className="editor-group-row">
-                <div className="editor-group" style={{ flex: '0 0 80px' }}>
-                  <label className="editor-label">Émoji</label>
-                  <input
-                    type="text"
-                    placeholder="📝"
-                    value={editColEmoji}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      // Keep only the first character (handling compound emojis is tricky, but browser max length works best)
-                      setEditColEmoji(val);
-                    }}
-                    maxLength={2} // Emojis are sometimes 2 characters in JS strings
-                    className="editor-input-title"
-                    style={{ textAlign: 'center', fontSize: '24px', padding: '10px' }}
-                    required
-                  />
-                </div>
-                <div className="editor-group">
-                  <label className="editor-label">Titre de la collection</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Courses, Livres..."
-                    value={editColTitle}
-                    onChange={(e) => setEditColTitle(e.target.value)}
-                    className="editor-input-title"
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
-            </>
+            </div>
           )}
+
+          <div className="editor-group border-top">
+             <label className="editor-label">Couleur</label>
+            <ColorPicker
+              selectedColor={editColor}
+              onSelectColor={setEditColor}
+            />
+          </div>
 
           <div className="editor-submit-area">
             <button 
               type="submit" 
               className="editor-save-btn btn-tap"
-              style={{ backgroundColor: editorType === 'slot' ? editSlotColor : 'var(--accent)' }}
+              style={{ backgroundColor: editColor }}
             >
               Enregistrer
             </button>
@@ -526,13 +460,7 @@ export default function App() {
               <button 
                 type="button" 
                 className="editor-delete-btn btn-tap"
-                onClick={() => {
-                  if (editorType === 'slot') {
-                    handleDeleteSlot(editSlotId);
-                  } else {
-                    handleDeleteCollection(editColId);
-                  }
-                }}
+                onClick={() => handleDeleteSlot(editId)}
               >
                 Supprimer
               </button>
