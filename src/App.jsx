@@ -179,10 +179,12 @@ export default function App() {
   };
 
   const handleDeleteSlot = (id) => {
-    setSlots(prev => prev.filter(s => s.id !== id));
-    setIsDetailOpen(false);
-    setIsEditOpen(false);
-    if (navigator.vibrate) navigator.vibrate(50);
+    if (window.confirm('Voulez-vous vraiment supprimer cet élément ?')) {
+      setSlots(prev => prev.filter(s => s.id !== id));
+      setIsDetailOpen(false);
+      setIsEditOpen(false);
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
   };
 
   const handleStartTimeChange = (newStart) => {
