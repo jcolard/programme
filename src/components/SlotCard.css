@@ -1,0 +1,148 @@
+.slot-card {
+  position: absolute;
+  pointer-events: auto; /* enable click on card */
+  background-color: var(--card-theme-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  box-sizing: border-box;
+  display: flex;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.slot-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--card-theme-color);
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.slot-card:active {
+  transform: scale(0.97) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.slot-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  padding-left: 4px;
+  overflow: hidden;
+}
+
+.slot-card-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--card-theme-border);
+  letter-spacing: 0.2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+  margin-bottom: auto;
+}
+
+.slot-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.slot-card-badge-icon {
+  color: var(--text-secondary);
+}
+
+.slot-card-badge-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Compact layout for slots 30 mins or less */
+.slot-card-short {
+  padding: 4px 8px;
+}
+
+.slot-card-short .slot-card-content {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.slot-card-short .slot-card-title {
+  font-size: 12px;
+  margin: 0;
+  flex: 1;
+}
+
+.slot-card-short .slot-card-time {
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+/* Very compact layout for slots 30 mins or less (height 20px) */
+.slot-card-very-short {
+  padding: 0px 6px;
+  align-items: center;
+}
+
+.slot-card-very-short .slot-card-content {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.slot-card-very-short .slot-card-title {
+  font-size: 11px;
+  margin: 0;
+  line-height: 1;
+}
+
+.slot-card-very-short .slot-card-time {
+  display: none;
+}
+
+/* Ensure font readability for small slot sizes */
+@media (max-height: 40px) {
+  .slot-card {
+    padding: 4px 8px;
+  }
+  .slot-card-title {
+    font-size: 12px;
+  }
+  .slot-card-time {
+    font-size: 9px;
+  }
+  .slot-card-badge {
+    display: none;
+  }
+}

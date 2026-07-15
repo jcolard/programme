@@ -1,0 +1,18 @@
+{
+  "name": "Ma Journée - Planificateur Tactile",
+  "short_name": "Ma Journée",
+  "description": "Planificateur journalier tactile optimisé mobile",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090d16",
+  "theme_color": "#131926",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

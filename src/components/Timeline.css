@@ -1,0 +1,67 @@
+.timeline-container {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  position: relative;
+  background-color: var(--bg-primary);
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px; /* space at bottom to scroll past last hour */
+}
+
+.timeline-content {
+  position: relative;
+  width: 100%;
+  /* We start grid content after the sidebar label */
+}
+
+.timeline-grid-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.timeline-hour-label {
+  width: 68px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -8px; /* Center text vertically on the grid line */
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-grid-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.timeline-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 68px;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+
+/* Row-specific hover highlight for non-touch devices */
+@media (hover: hover) {
+  .timeline-grid-row:hover .timeline-grid-line {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+.timeline-slots-area {
+  position: absolute;
+  top: 0;
+  left: 68px;
+  right: 12px;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none; /* Let clicks pass through empty spaces of this area */
+}
