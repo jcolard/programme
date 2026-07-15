@@ -3,6 +3,7 @@ import './Checklist.css';
 
 export default function Checklist({ items = [], onAddItem, onDeleteItem, themeColor = '#6366f1' }) {
   const [newItemText, setNewItemText] = useState('');
+  const [selectedDetailText, setSelectedDetailText] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,7 +23,14 @@ export default function Checklist({ items = [], onAddItem, onDeleteItem, themeCo
         {items.map((item) => (
           <li key={item.id} className="checklist-item">
             <span className="checklist-item-bullet" style={{ backgroundColor: themeColor }} />
-            <span className="checklist-item-text">{item.text}</span>
+            <span 
+              className="checklist-item-text" 
+              onClick={() => setSelectedDetailText(item.text)}
+              style={{ cursor: 'pointer' }}
+              title="Cliquez pour voir en entier"
+            >
+              {item.text}
+            </span>
             
             <button 
               type="button" 
@@ -64,6 +72,18 @@ export default function Checklist({ items = [], onAddItem, onDeleteItem, themeCo
           </svg>
         </button>
       </form>
+
+      {/* Read-only detail modal */}
+      {selectedDetailText && (
+        <div 
+          className="checklist-detail-modal"
+          onClick={() => setSelectedDetailText(null)}
+        >
+          <div className="checklist-detail-modal-content" onClick={(e) => e.stopPropagation()}>
+            <p>{selectedDetailText}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
