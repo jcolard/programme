@@ -33,10 +33,9 @@ export default function SlotCard({ slot, style, onClick }) {
     >
       <div className="slot-card-border" />
       <div className="slot-card-content">
-        <div className="slot-card-time">{slot.startTime}</div>
         <div className="slot-card-title">{slot.title}</div>
         
-        {hasItems && !isShort && (
+        {hasItems && !isVeryShort && (
           <div className="slot-card-badge">
             <svg 
               className="slot-card-badge-icon" 

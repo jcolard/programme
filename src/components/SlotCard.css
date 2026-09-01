@@ -4,7 +4,7 @@
   background-color: var(--card-theme-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 8px 12px;
+  padding: 6px 10px;
   box-sizing: border-box;
   display: flex;
   overflow: hidden;
@@ -36,30 +36,21 @@
 .slot-card-content {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   height: 100%;
   width: 100%;
   padding-left: 4px;
   overflow: hidden;
 }
 
-.slot-card-time {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--card-theme-border);
-  letter-spacing: 0.2px;
-  font-variant-numeric: tabular-nums;
-}
-
 .slot-card-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 1px;
-  margin-bottom: auto;
+  line-height: 1.25;
 }
 
 .slot-card-badge {
@@ -85,7 +76,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Compact layout for slots 30 mins or less */
+/* Compact layout for short slots (e.g. 1 hour) */
 .slot-card-short {
   padding: 4px 8px;
 }
@@ -94,7 +85,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
 
 .slot-card-short .slot-card-title {
@@ -103,12 +94,12 @@
   flex: 1;
 }
 
-.slot-card-short .slot-card-time {
-  font-size: 9px;
-  flex-shrink: 0;
+.slot-card-short .slot-card-badge {
+  margin-top: 0;
+  padding: 1px 5px;
 }
 
-/* Very compact layout for slots 30 mins or less (height 20px) */
+/* Very compact layout for slots 30 mins or less */
 .slot-card-very-short {
   padding: 0px 6px;
   align-items: center;
@@ -127,20 +118,13 @@
   line-height: 1;
 }
 
-.slot-card-very-short .slot-card-time {
-  display: none;
-}
-
 /* Ensure font readability for small slot sizes */
 @media (max-height: 40px) {
   .slot-card {
-    padding: 4px 8px;
+    padding: 3px 6px;
   }
   .slot-card-title {
-    font-size: 12px;
-  }
-  .slot-card-time {
-    font-size: 9px;
+    font-size: 11px;
   }
   .slot-card-badge {
     display: none;
