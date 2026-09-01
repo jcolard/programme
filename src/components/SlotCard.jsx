@@ -33,7 +33,7 @@ export default function SlotCard({ slot, style, onClick }) {
     >
       <div className="slot-card-border" />
       <div className="slot-card-content">
-        <div className="slot-card-time">{slot.startTime} - {slot.endTime}</div>
+        <div className="slot-card-time">{slot.startTime}</div>
         <div className="slot-card-title">{slot.title}</div>
         
         {hasItems && !isShort && (
