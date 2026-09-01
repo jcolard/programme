@@ -1,6 +1,6 @@
 // Service pour la synchronisation Cloud via Google Apps Script Web App
 
-export const DEFAULT_APPS_SCRIPT_URL = '';
+export const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHeaWJgVQqAaLlgkk6X9nhQRD4iOKA8WkAZI2erpNlXLdc8BmI0tIcQbyS0qKu-dAQrw/exec';
 
 /**
  * Envoie l'intégralité des données (les 3 jours types + configuration) vers le Google Drive via Apps Script
