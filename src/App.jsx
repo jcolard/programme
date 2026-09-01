@@ -769,7 +769,7 @@ export default function App() {
       >
         <form onSubmit={handleSaveEditor} className="slot-editor-form">
           <div className="editor-group-row">
-            <div className="editor-group" style={{ flex: '0 0 80px' }}>
+            <div className="editor-group editor-emoji-group">
               <label className="editor-label">Émoji</label>
               <input
                 type="text"
@@ -778,7 +778,7 @@ export default function App() {
                 onChange={(e) => setEditEmoji(e.target.value)}
                 maxLength={2}
                 className="editor-input-title"
-                style={{ textAlign: 'center', fontSize: '24px', padding: '10px' }}
+                style={{ textAlign: 'center', fontSize: '22px', padding: '10px 4px' }}
                 required
               />
             </div>
@@ -836,7 +836,6 @@ export default function App() {
           )}
 
           <div className="editor-group border-top">
-             <label className="editor-label">Couleur</label>
             <ColorPicker
               selectedColor={editColor}
               onSelectColor={setEditColor}
@@ -884,7 +883,7 @@ export default function App() {
               value={tempScriptUrl}
               onChange={(e) => setTempScriptUrl(e.target.value)}
               className="editor-input-title"
-              style={{ fontSize: '14px', wordBreak: 'break-all' }}
+              style={{ fontSize: '13px', wordBreak: 'break-all' }}
             />
             <span className="settings-hint">
               ID Fichier Google Drive : <code>1tMm3y6prKb251h2Hq70rUt0ehfGWt2kB</code>
