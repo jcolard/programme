@@ -510,9 +510,22 @@ export default function App() {
     if (navigator.vibrate) navigator.vibrate(15);
   };
 
+  const handleUpdateDetailItem = (itemId, newText) => {
+    if (!selectedItem) return;
+    const updatedSlot = {
+      ...selectedItem,
+      items: (selectedItem.items || []).map(item =>
+        item.id === itemId ? { ...item, text: newText } : item
+      )
+    };
+    setSelectedItem(updatedSlot);
+    updateCurrentDaySlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
   const handleDeleteDetailItem = (itemId) => {
     if (!selectedItem) return;
-    const updatedSlot = { ...selectedItem, items: selectedItem.items.filter(item => item.id !== itemId) };
+    const updatedSlot = { ...selectedItem, items: (selectedItem.items || []).filter(item => item.id !== itemId) };
     setSelectedItem(updatedSlot);
     updateCurrentDaySlots(prev => prev.map(s => s.id === selectedItem.id ? updatedSlot : s));
     if (navigator.vibrate) navigator.vibrate(10);
@@ -727,6 +740,7 @@ export default function App() {
               <Checklist
                 items={selectedItem.items || []}
                 onAddItem={handleAddDetailItem}
+                onUpdateItem={handleUpdateDetailItem}
                 onDeleteItem={handleDeleteDetailItem}
                 themeColor={selectedItem.color}
               />
